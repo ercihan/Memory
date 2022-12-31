@@ -1,13 +1,13 @@
 package com.zhaw.memory
 
 import android.os.Bundle
+import android.os.SystemClock.sleep
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
 import com.zhaw.memory.databinding.FragmentFirstBinding
-import kotlinx.coroutines.delay
 import kotlin.random.Random
 
 /**
@@ -224,14 +224,16 @@ class FirstFragment : Fragment() {
 
     private fun checkCardsEquality(){
         if(CentralObjects.currentUncoveredCards == 2 && CentralObjects.currentOpenCards.size == 2){
-            if(CentralObjects.currentOpenCards.get(0).equals(CentralObjects.currentOpenCards.get(1))){
+            var valuesCurrentCards: ArrayList<String> = ArrayList()
+            for ((key, value) in CentralObjects.currentOpenCards) {
+                valuesCurrentCards.add(value)
+            }
+            if(valuesCurrentCards.get(0).equals(valuesCurrentCards.get(1))){
                 addPoint()
-                //delay(6000)
                 buttonDisappearForWholeGame()
                 refreshPoints()
             }
             else{
-                //Thread.sleep(500L)
                 buttonDisappear()
                 togglePlayer()
             }
@@ -285,6 +287,7 @@ class FirstFragment : Fragment() {
     private fun buttonDisappear(){
         if(CentralObjects.currentUncoveredCards == 2 && CentralObjects.currentOpenCards.size == 2){
             var keys = CentralObjects.currentOpenCards.keys
+            //sleep(2000)
             keys.forEach{CentralObjects.buttons.get(it)?.setText("")}
             CentralObjects.currentUncoveredCards = 0
             CentralObjects.currentOpenCards.clear()
