@@ -1,13 +1,16 @@
 package com.zhaw.memory
 
 import android.os.Bundle
-import android.os.SystemClock.sleep
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
 import com.zhaw.memory.databinding.FragmentFirstBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 /**
@@ -212,17 +215,19 @@ class FirstFragment : Fragment() {
     }
 
     private fun showEmojiIfAllowed(cardNr: Int){
-        if(CentralObjects.currentUncoveredCards < 2){
-            CentralObjects.buttons.get(cardNr)!!.setText(CentralObjects.cardMappings.get(cardNr))
+        if(CentralObjects.currentUncoveredCards < 2) {
             CentralObjects.currentUncoveredCards = CentralObjects.currentUncoveredCards + 1
             CentralObjects.currentOpenCards.put(cardNr, CentralObjects.cardMappings.get(cardNr))
             if(CentralObjects.currentUncoveredCards == 2){
-                checkCardsEquality()
+                checkCardsEqualitySetValue(cardNr)
+            }
+            else{
+                CentralObjects.buttons.get(cardNr)!!.setText(CentralObjects.cardMappings.get(cardNr))
             }
         }
     }
 
-    private fun checkCardsEquality(){
+    private fun checkCardsEqualitySetValue(cardNr: Int){
         if(CentralObjects.currentUncoveredCards == 2 && CentralObjects.currentOpenCards.size == 2){
             var valuesCurrentCards: ArrayList<String> = ArrayList()
             for ((key, value) in CentralObjects.currentOpenCards) {
@@ -230,11 +235,19 @@ class FirstFragment : Fragment() {
             }
             if(valuesCurrentCards.get(0).equals(valuesCurrentCards.get(1))){
                 addPoint()
-                buttonDisappearForWholeGame()
+                GlobalScope.launch(Dispatchers.Main) {
+                    CentralObjects.buttons.get(cardNr)!!.setText(CentralObjects.cardMappings.get(cardNr))
+                    delay(1000)
+                    buttonDisappearForWholeGame()
+                }
                 refreshPoints()
             }
-            else{
+            else {
+                GlobalScope.launch(Dispatchers.Main) {
+                CentralObjects.buttons.get(cardNr)!!.setText(CentralObjects.cardMappings.get(cardNr))
+                    delay(1000)
                 buttonDisappear()
+            }
                 togglePlayer()
             }
         }
@@ -272,23 +285,22 @@ class FirstFragment : Fragment() {
     }
 
     private fun buttonDisappearForWholeGame(){
-        if(CentralObjects.currentUncoveredCards == 2 && CentralObjects.currentOpenCards.size == 2){
+        if (CentralObjects.currentUncoveredCards == 2 && CentralObjects.currentOpenCards.size == 2) {
             var keys = CentralObjects.currentOpenCards.keys
-            keys.forEach{CentralObjects.buttons.get(it)?.visibility = View.INVISIBLE}
+            keys.forEach { CentralObjects.buttons.get(it)?.visibility = View.INVISIBLE }
             CentralObjects.currentUncoveredCards = 0
             CentralObjects.currentOpenCards.clear()
             CentralObjects.buttonsDisappeard = CentralObjects.buttonsDisappeard + 2
-            if(CentralObjects.buttonsDisappeard == 30){
+            if (CentralObjects.buttonsDisappeard == 30) {
                 whoWon()
             }
         }
     }
 
     private fun buttonDisappear(){
-        if(CentralObjects.currentUncoveredCards == 2 && CentralObjects.currentOpenCards.size == 2){
+        if (CentralObjects.currentUncoveredCards == 2 && CentralObjects.currentOpenCards.size == 2) {
             var keys = CentralObjects.currentOpenCards.keys
-            //sleep(2000)
-            keys.forEach{CentralObjects.buttons.get(it)?.setText("")}
+            keys.forEach { CentralObjects.buttons.get(it)?.setText("") }
             CentralObjects.currentUncoveredCards = 0
             CentralObjects.currentOpenCards.clear()
         }
